@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Samia's DNA Analyzer</title>
+
+<style>
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    padding: 25px 15px;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #e0f7ec, #edf0ff);
+    color: #183b32;
+}
+
+header {
+    text-align: center;
+    padding: 20px;
+}
+
+header h1 {
+    color: #087f5b;
+    font-size: 32px;
+}
+
+.container {
+    max-width: 700px;
+    margin: auto;
+    background: white;
+    padding: 25px;
+    border-radius: 18px;
+    box-shadow: 0 8px 25px #c5d9ce;
+}
+
+input {
+    width: 100%;
+    padding: 14px;
+    border: 2px solid #cce5d8;
+    border-radius: 8px;
+    font-size: 16px;
+    margin: 10px 0;
+}
+
+button {
+    width: 100%;
+    padding: 14px;
+    background: #087f5b;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+button:hover { background: #056345; }
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.card {
+    background: #effaf4;
+    padding: 15px;
+    text-align: center;
+    border-radius: 10px;
+}
+
+.card h3 {
+    color: #087f5b;
+    font-size: 24px;
+    margin: 8px;
+}
+
+.result-box {
+    background: #f4f7ff;
+    padding: 15px;
+    border-radius: 10px;
+    margin-top: 15px;
+    overflow-wrap: anywhere;
+}
+
+.sequence {
+    font-family: monospace;
+    margin-top: 10px;
+}
+
+#error {
+    color: #c62828;
+    font-weight: bold;
+}
+
+#results { display: none; }
+
+.bar-row { margin: 15px 0; }
+
+.bar-background {
+    background: #e0e0e0;
+    border-radius: 5px;
+    margin-top: 5px;
+}
+
+.bar {
+    height: 22px;
+    background: #087f5b;
+    border-radius: 5px;
+    min-width: 0;
+}
+
+footer {
+    text-align: center;
+    margin-top: 25px;
+    color: #55736a;
+    font-size: 13px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>🧬 Samia's DNA Analyzer</h1>
+    <p>Explore DNA with a beginner bioinformatics project</p>
+</header>
+
+<main class="container">
+
+    <h2>🔬 DNA Sequence Analysis</h2>
+
+    <p>Enter a DNA sequence to analyze its nucleotides.</p>
+
+    <label for="dna">DNA Sequence</label>
+
+    <input id="dna" type="text" placeholder="Example: ATGCGC">
+
+    <button onclick="analyzeDNA()">Analyze DNA</button>
+
+    <p id="error"></p>
+
+    <section id="results">
+
+        <h2>📊 Analysis Results</h2>
+
+        <div class="stats">
+            <div class="card">
+                <p>DNA Length</p>
+                <h3 id="length">0</h3>
+            </div>
+
+            <div class="card">
+                <p>GC Content</p>
+                <h3 id="gc">0%</h3>
+            </div>
+
+            <div class="card">
+                <p>Adenine (A)</p>
+                <h3 id="a">0</h3>
+            </div>
+
+            <div class="card">
+                <p>Thymine (T)</p>
+                <h3 id="t">0</h3>
+            </div>
+
+            <div class="card">
+                <p>Guanine (G)</p>
+                <h3 id="g">0</h3>
+            </div>
+
+            <div class="card">
+                <p>Cytosine (C)</p>
+                <h3 id="c">0</h3>
+            </div>
+        </div>
+
+        <div class="result-box">
+            <strong>🧬 Colorful DNA Sequence</strong>
+            <div id="visualDNA" class="sequence"></div>
+        </div><div id="original" class="sequence"></div>
+
+        <div class="result-box">
+            <strong>🔗 Complementary DNA</strong>
+            <div id="complement" class="sequence"></div>
+        </div><div class="result-box">
+            <strong>🧬 DNA Base Pair Visualization</strong>
+            <div id="basePairs" class="sequence"></div>
+        </div>
+        <div class="result-box">
+            <strong>🧬 DNA Mutation Checker</strong>
+            <p>Enter another DNA sequence to compare with                  your original DNA.</p>
+
+        <input id="compareDNA" type="text"                              placeholder="Example: ATGCGT">
+
+        <button onclick="checkMutation()">Compare             DNA</button>
+
+       <div id="mutationResult"></div>
+       </div>
+
+        <div class="result-box">
+            <strong>📊 DNA Nucleotide Chart</strong>
+            <div id="chart"></div>
+        </div>
+
+    </section>
+</main>
+
+<footer>
+    <p>Created by Samia | Beginner Bioinformatics Project</p>
+    <p>For educational purposes</p>
+</footer>
+
+<script>
+function checkMutation() {
+    const originalDNA = document.getElementById("dna").value
+        .toUpperCase().replace(/\s/g, "");
+
+    const compareDNA = document.getElementById("compareDNA").value
+        .toUpperCase().replace(/\s/g, "");
+
+    const result = document.getElementById("mutationResult");
+
+    if (!originalDNA || !compareDNA) {
+        result.textContent = "Please enter both DNA sequences!";
+        return;
+    }
+
+    if (!/^[ATGC]+$/.test(originalDNA) ||
+        !/^[ATGC]+$/.test(compareDNA)) {
+        result.textContent = "Use only A, T, G, and C.";
+        return;
+    }
+
+    if (originalDNA.length !== compareDNA.length) {
+        result.textContent =
+            "The sequences have different lengths. Compare equal-length sequences.";
+        return;
+    }
+
+    let differences = 0;
+    let changedPositions = [];
+
+    for (let i = 0; i < originalDNA.length; i++) {
+        if (originalDNA[i] !== compareDNA[i]) {
+            differences++;
+            changedPositions.push(i + 1);
+        }
+    }
+
+    if (differences === 0) {
+        result.innerHTML =
+            "<p style='color:green;font-weight:bold;'>✅ No differences found!</p>";
+    } else {
+        result.innerHTML =
+            "<p style='color:#c62828;font-weight:bold;'>🔬 Differences found: " +
+            differences +
+            "</p><p>Position(s): " +
+            changedPositions.join(", ") +
+            "</p>";
+    }
+}
+function analyzeDNA() {
+    const dna = document.getElementById("dna").value
+        .toUpperCase().replace(/\s/g, "");
+
+    const error = document.getElementById("error");
+    const results = document.getElementById("results");
+
+    error.textContent = "";
+    results.style.display = "none";
+
+    if (dna.length === 0) {
+        error.textContent = "Please enter a DNA sequence!";
+        return;
+    }
+
+    if (!/^[ATGC]+$/.test(dna)) {
+        error.textContent = "Invalid DNA! Use only A, T, G, and C.";
+        return;
+    }
+
+    const a = [...dna].filter(x => x === "A").length;
+    const t = [...dna].filter(x => x === "T").length;
+    const g = [...dna].filter(x => x === "G").length;
+    const c = [...dna].filter(x => x === "C").length;
+
+    const gc = ((g + c) / dna.length * 100).toFixed(2);
+
+    const pairs = {A:"T", T:"A", G:"C", C:"G"};
+    let complement = "";
+
+    for (const base of dna) {
+        complement += pairs[base];
+    }
+
+    document.getElementById("length").textContent = dna.length;
+    document.getElementById("gc").textContent = gc + "%";
+
+    document.getElementById("a").textContent = a;
+    document.getElementById("t").textContent = t;
+    document.getElementById("g").textContent = g;
+    document.getElementById("c").textContent = c;
+
+    document.getElementById("original").textContent = dna;
+    document.getElementById("visualDNA").innerHTML =
+    [...dna].map(base => {
+        const colors = {
+            A: "#16803c",
+            T: "#dc3545",
+            G: "#1769aa",
+            C: "#e67e22"
+        };
+
+        return `<span style="
+            color: ${colors[base]};
+            background: #f1f5f9;
+            padding: 4px;
+            margin: 2px;
+            display: inline-block;
+            border-radius: 4px;
+            font-weight: bold;
+        ">${base}</span>`;
+    }).join("");
+    document.getElementById("complement").textContent = complement;
+    document.getElementById("basePairs").innerHTML =
+    [...dna].map((base, i) => `
+        <div style="
+            display: inline-block;
+            margin: 5px;
+            padding: 10px;
+            background: #e8f5e9;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+        ">
+            <span style="color: #16803c;">${base}</span>
+            <br>│
+            <br>
+            <span style="color: #dc3545;">${complement[i]}</span>
+        </div>
+    `).join("");
+
+    const counts = [
+        {base:"A", count:a},
+        {base:"T", count:t},
+        {base:"G", count:g},
+        {base:"C", count:c}
+    ];
+
+    const maxCount = Math.max(...counts.map(x => x.count));
+
+    document.getElementById("chart").innerHTML = counts.map(x => `
+        <div class="bar-row">
+            <strong>${x.base}: ${x.count}</strong>
+            <div class="bar-background">
+                <div class="bar" style="width:${x.count / maxCount * 100}%"></div>
+            </div>
+        </div>
+    `).join("");
+
+    results.style.display = "block";
+}
+</script>
+
+</body>
+</html>
